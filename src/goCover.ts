@@ -201,7 +201,7 @@ function emptyCoverageData(): CoverageData {
 /**
  * Clear the coverage on all files
  */
-function clearCoverage() {
+export function clearCoverage() {
 	coverageData = {};
 	disposeDecorators();
 	isCoverageApplied = false;
@@ -218,9 +218,6 @@ export function applyCodeCoverageToAllEditors(coverProfilePath: string, dir: str
 		try {
 			const showCounts = getGoConfig().get('coverShowCounts') as boolean;
 			const coveragePath = new Map<string, CoverageData>(); // <filename> from the cover profile to the coverage data.
-
-			// Clear existing coverage files
-			clearCoverage();
 
 			// collect the packages named in the coverage file
 			const seenPaths = new Set<string>();
@@ -459,7 +456,7 @@ export function removeCodeCoverageOnFileSave(e: vscode.TextDocument) {
 	}
 
 	if (modifiedFiles[e.fileName]) {
-		clearCoverage();
+		//clearCoverage();
 		modifiedFiles = {}; // reset the list of modified files
 	}
 }

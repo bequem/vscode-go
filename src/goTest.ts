@@ -7,6 +7,7 @@
 
 import path = require('path');
 import vscode = require('vscode');
+import { clearCoverage } from './goCover';
 import { isModSupported } from './goModules';
 import {
 	extractInstanceTestName,
@@ -268,7 +269,7 @@ export async function testCurrentPackage(goConfig: vscode.WorkspaceConfiguration
 		vscode.window.showInformationMessage('No editor is active.');
 		return;
 	}
-
+	clearCoverage();
 	const isMod = await isModSupported(editor.document.uri);
 	const testConfig: TestConfig = {
 		goConfig,
@@ -305,7 +306,8 @@ export function testWorkspace(goConfig: vscode.WorkspaceConfiguration, args: any
 		goConfig,
 		dir: workspaceUri.fsPath,
 		flags: getTestFlags(goConfig, args),
-		includeSubDirectories: true
+		includeSubDirectories: true,
+		applyCodeCoverage: true
 	};
 	// Remember this config as the last executed test.
 	lastTestConfig = testConfig;

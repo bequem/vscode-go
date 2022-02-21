@@ -259,6 +259,7 @@ export interface GoTestOutput {
  */
 export async function goTest(testconfig: TestConfig): Promise<boolean> {
 	let outputChannel = testOutputChannel;
+	testconfig.applyCodeCoverage = true;
 	if (testconfig.outputChannel) {
 		outputChannel = testconfig.outputChannel;
 	}

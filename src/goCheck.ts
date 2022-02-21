@@ -19,6 +19,7 @@ import { diagnosticsStatusBarItem, outputChannel } from './goStatus';
 import { goVet } from './goVet';
 import { getTestFlags, goTest, TestConfig } from './testUtils';
 import { ICheckResult } from './util';
+import { clearCoverage } from './goCover';
 
 const STATUS_BAR_ITEM_NAME = 'Go Test';
 const statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM_NAME, vscode.StatusBarAlignment.Left);
@@ -99,6 +100,7 @@ export function check(fileUri: vscode.Uri, goConfig: vscode.WorkspaceConfigurati
 	if (goConfig['testOnSave']) {
 		statusBarItem.show();
 		statusBarItem.text = 'Tests Running';
+		clearCoverage();
 		runTest().then((success) => {
 			if (statusBarItem.text === '') {
 				return;

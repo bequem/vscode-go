@@ -10,12 +10,15 @@
 
 import * as path from 'path';
 import { extensionInfo, getGoConfig, getGoplsConfig } from './config';
+import { ExtensionAPI } from './export';
+import extensionAPI from './extensionAPI';
 import { browsePackages } from './goBrowsePackage';
 import { buildCode } from './goBuild';
 import { check, notifyIfGeneratedFile, removeTestStatus } from './goCheck';
 import {
 	applyCodeCoverage,
 	applyCodeCoverageToAllEditors,
+	clearCoverage,
 	initCoverageDecorators,
 	removeCodeCoverageOnFileSave,
 	toggleCoverageCurrentPackage,
@@ -31,6 +34,7 @@ import {
 	offerToInstallLatestGoVersion,
 	setEnvironmentVariableCollection
 } from './goEnvironmentStatus';
+import { GoExplorerProvider } from './goExplorer';
 import { runFillStruct } from './goFillStruct';
 import * as goGenerateTests from './goGenerateTests';
 import { goGetPackage } from './goGetPackage';
@@ -45,13 +49,6 @@ import {
 	promptForMissingTool,
 	updateGoVarsFromConfig
 } from './goInstallTools';
-import {
-	languageServerIsRunning,
-	RestartReason,
-	showServerOutputChannel,
-	startLanguageServerWithFallback,
-	watchLanguageServerConfiguration
-} from './language/goLanguageServer';
 import { lintCode } from './goLint';
 import { logVerbose, setLogConfig } from './goLogging';
 import { GO_MODE } from './goMode';
@@ -61,6 +58,7 @@ import { playgroundCommand } from './goPlayground';
 import { GoReferencesCodeLensProvider } from './goReferencesCodelens';
 import { GoRunTestCodeLensProvider } from './goRunTestCodelens';
 import { disposeGoStatusBar, expandGoStatusBar, outputChannel, updateGoStatusBar } from './goStatus';
+import { resetSurveyConfigs, showSurveyConfig } from './goSurvey';
 import {
 	debugPrevious,
 	subTestAtCursor,
@@ -71,8 +69,19 @@ import {
 	testPrevious,
 	testWorkspace
 } from './goTest';
+import { GoTestExplorer, isVscodeTestingAPIAvailable } from './goTest/explore';
+import { killRunningPprof } from './goTest/profile';
 import { getConfiguredTools, Tool } from './goTools';
 import { vetCode } from './goVet';
+import { VulncheckProvider } from './goVulncheck';
+import {
+	languageServerIsRunning,
+	RestartReason,
+	showServerOutputChannel,
+	startLanguageServerWithFallback,
+	watchLanguageServerConfiguration
+} from './language/goLanguageServer';
+import { getFormatTool } from './language/legacy/goFormat';
 import { pickGoProcess, pickProcess } from './pickProcess';
 import {
 	getFromGlobalState,
@@ -99,18 +108,10 @@ import {
 	isGoPathSet,
 	resolvePath
 } from './util';
-import { clearCacheForTools, fileExists, getCurrentGoRoot, dirExists, envPath } from './utils/pathUtils';
+import { clearCacheForTools, dirExists, envPath, fileExists, getCurrentGoRoot } from './utils/pathUtils';
 import { WelcomePanel } from './welcome';
 import semver = require('semver');
 import vscode = require('vscode');
-import { getFormatTool } from './language/legacy/goFormat';
-import { resetSurveyConfigs, showSurveyConfig, timeMinute } from './goSurvey';
-import { ExtensionAPI } from './export';
-import extensionAPI from './extensionAPI';
-import { GoTestExplorer, isVscodeTestingAPIAvailable } from './goTest/explore';
-import { killRunningPprof } from './goTest/profile';
-import { GoExplorerProvider } from './goExplorer';
-import { VulncheckProvider } from './goVulncheck';
 
 export let buildDiagnosticCollection: vscode.DiagnosticCollection;
 export let lintDiagnosticCollection: vscode.DiagnosticCollection;
@@ -421,6 +422,12 @@ async function activateContinued(
 	ctx.subscriptions.push(
 		vscode.commands.registerCommand('go.test.coverage', () => {
 			toggleCoverageCurrentPackage();
+		})
+	);
+
+	ctx.subscriptions.push(
+		vscode.commands.registerCommand('go.test.clearCoverage', () => {
+			clearCoverage();
 		})
 	);
 
