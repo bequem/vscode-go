@@ -16,6 +16,7 @@ import { check, notifyIfGeneratedFile, removeTestStatus } from './goCheck';
 import {
 	applyCodeCoverage,
 	applyCodeCoverageToAllEditors,
+	clearCoverage,
 	initCoverageDecorators,
 	removeCodeCoverageOnFileSave,
 	toggleCoverageCurrentPackage,
@@ -403,6 +404,12 @@ If you would like additional configuration for diagnostics from gopls, please se
 	ctx.subscriptions.push(
 		vscode.commands.registerCommand('go.test.coverage', () => {
 			toggleCoverageCurrentPackage();
+		})
+	);
+
+	ctx.subscriptions.push(
+		vscode.commands.registerCommand('go.test.clearCoverage', () => {
+			clearCoverage();
 		})
 	);
 
@@ -903,8 +910,7 @@ async function suggestUpdates(ctx: vscode.ExtensionContext) {
 	if (toolsToUpdate.length > 0) {
 		const updateToolsCmdText = 'Update tools';
 		const selected = await vscode.window.showWarningMessage(
-			`Tools (${toolsToUpdate.map((tool) => tool.name).join(', ')}) need recompiling to work with ${
-				configuredGoVersion.version
+			`Tools (${toolsToUpdate.map((tool) => tool.name).join(', ')}) need recompiling to work with ${configuredGoVersion.version
 			}`,
 			updateToolsCmdText
 		);

@@ -1,7 +1,7 @@
 {
   "name": "go",
-  "displayName": "Go",
-  "version": "0.32.0-dev",
+  "displayName": "Go-custom",
+  "version": "0.32.1-custom2",
   "preview": true,
   "publisher": "golang",
   "description": "Rich Go language support for Visual Studio Code",
@@ -301,6 +301,11 @@
         "command": "go.test.coverage",
         "title": "Go: Toggle Test Coverage In Current Package",
         "description": "Displays test coverage in the current package."
+      },
+      {
+        "command": "go.test.clearCoverage",
+        "title": "Go: Clear Test Coverage",
+        "description": ""
       },
       {
         "command": "go.test.generate.package",
@@ -1721,6 +1726,11 @@
         "go.editorContextMenuCommands": {
           "type": "object",
           "properties": {
+            "clearCoverage": {
+              "type": "boolean",
+              "default": true,
+              "description": ""
+            },
             "toggleTestFile": {
               "type": "boolean",
               "default": true,
@@ -2608,6 +2618,11 @@
         {
           "when": "editorTextFocus && config.go.editorContextMenuCommands.testCoverage && resourceLangId == go",
           "command": "go.test.coverage",
+          "group": "Go group 1"
+        },
+        {
+          "when": "editorTextFocus && resourceLangId == go",
+          "command": "go.test.clearCoverage",
           "group": "Go group 1"
         },
         {

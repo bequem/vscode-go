@@ -11,6 +11,7 @@ import path = require('path');
 import vscode = require('vscode');
 import { getGoplsConfig } from './config';
 import { goBuild } from './goBuild';
+import { clearCoverage } from './goCover';
 import { buildLanguageServerConfig } from './goLanguageServer';
 import { goLint } from './goLint';
 import { buildDiagnosticCollection, lintDiagnosticCollection, vetDiagnosticCollection } from './goMain';
@@ -99,6 +100,7 @@ export function check(fileUri: vscode.Uri, goConfig: vscode.WorkspaceConfigurati
 	if (goConfig['testOnSave']) {
 		statusBarItem.show();
 		statusBarItem.text = 'Tests Running';
+		clearCoverage();
 		runTest().then((success) => {
 			if (statusBarItem.text === '') {
 				return;
