@@ -21,11 +21,19 @@ import vscode = require('vscode');
 import { outputChannel } from '../goStatus';
 import { isModSupported } from '../goModules';
 import { getGoConfig } from '../config';
-import { getBenchmarkFunctions, getTestFlags, getTestFunctions, goTest, GoTestOutput } from '../testUtils';
+import {
+	getBenchmarkFunctions,
+	getTestFlags,
+	getTestFunctions,
+	goTest,
+	GoTestOutput,
+	testOutputChannel
+} from '../testUtils';
 import { GoTestResolver } from './resolve';
 import { dispose, forEachAsync, GoTest, Workspace } from './utils';
 import { GoTestProfiler, ProfilingOptions } from './profile';
 import { debugTestAtCursor } from '../goTest';
+import { execShell } from '../util';
 
 let debugSessionID = 0;
 
@@ -84,6 +92,7 @@ export class GoTestRunner {
 			TestRunProfileKind.Run,
 			async (request, token) => {
 				try {
+					await execShell('make', ['test-infra-up'], workspace.workspaceFolders[0], testOutputChannel);
 					await this.run(request, token);
 				} catch (error) {
 					const m = 'Failed to execute tests';
@@ -99,6 +108,8 @@ export class GoTestRunner {
 			TestRunProfileKind.Debug,
 			async (request, token) => {
 				try {
+					await execShell('make', ['test-infra-up'], workspace.workspaceFolders[0], testOutputChannel);
+
 					await this.debug(request, token);
 				} catch (error) {
 					const m = 'Failed to debug tests';

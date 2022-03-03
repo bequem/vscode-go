@@ -1114,3 +1114,29 @@ export function isPositionInComment(document: vscode.TextDocument, position: vsc
 	}
 	return false;
 }
+
+export function execShell(
+	cmd: string,
+	args: string[],
+	workspaceFolder: vscode.WorkspaceFolder,
+	outputChannel: vscode.OutputChannel
+) {
+	return new Promise<string>((resolve, reject) => {
+		const cwd = workspaceFolder.uri.path;
+
+		const execute = cp.spawn(cmd, args, { cwd });
+
+		execute.stdout.on('data', (data) => {
+			outputChannel.append(data.toString());
+		});
+
+		execute.stderr.on('data', (data) => {
+			outputChannel.append(data.toString());
+		});
+
+		execute.on('exit', (code) => {
+			outputChannel.appendLine(`child process exited with code ${code}`);
+		});
+		resolve('');
+	});
+}

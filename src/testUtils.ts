@@ -22,7 +22,7 @@ import { parseEnvFile } from './utils/envUtils';
 import { envPath, expandFilePathInOutput, getCurrentGoRoot, getCurrentGoWorkspaceFromGOPATH } from './utils/pathUtils';
 import { killProcessTree } from './utils/processUtils';
 
-const testOutputChannel = vscode.window.createOutputChannel('Go Tests');
+export const testOutputChannel = vscode.window.createOutputChannel('Go Tests');
 const STATUS_BAR_ITEM_NAME = 'Go Test Cancel';
 const statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM_NAME, vscode.StatusBarAlignment.Left);
 statusBarItem.name = STATUS_BAR_ITEM_NAME;

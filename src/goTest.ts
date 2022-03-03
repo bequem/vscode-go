@@ -9,6 +9,7 @@ import path = require('path');
 import vscode = require('vscode');
 import { clearCoverage } from './goCover';
 import { isModSupported } from './goModules';
+import { outputChannel } from './goStatus';
 import {
 	extractInstanceTestName,
 	findAllTestSuiteRuns,
@@ -18,8 +19,10 @@ import {
 	getTestFunctions,
 	getTestTags,
 	goTest,
-	TestConfig
+	TestConfig,
+	testOutputChannel
 } from './testUtils';
+import { execShell } from './util';
 
 // lastTestConfig holds a reference to the last executed TestConfig which allows
 // the last test to be easily re-executed.
@@ -57,13 +60,22 @@ async function _testAtCursor(goConfig: vscode.WorkspaceConfiguration, cmd: TestA
 
 	await editor.document.save();
 
+	await execShell(
+		'make',
+		['test-infra-up'],
+		vscode.workspace.getWorkspaceFolder(editor.document.uri),
+		testOutputChannel
+	);
+	let result;
 	if (cmd === 'debug') {
-		return debugTestAtCursor(editor, testFunctionName, testFunctions, goConfig);
+		result = debugTestAtCursor(editor, testFunctionName, testFunctions, goConfig);
 	} else if (cmd === 'benchmark' || cmd === 'test') {
-		return runTestAtCursor(editor, testFunctionName, testFunctions, goConfig, cmd, args);
+		result = runTestAtCursor(editor, testFunctionName, testFunctions, goConfig, cmd, args);
 	} else {
 		throw new Error(`Unsupported command: ${cmd}`);
 	}
+
+	return result;
 }
 
 /**
@@ -253,6 +265,7 @@ export async function debugTestAtCursor(
 		buildFlags: buildFlags.join(' '),
 		sessionID
 	};
+
 	lastDebugConfig = debugConfig;
 	lastDebugWorkspaceFolder = workspaceFolder;
 	return await vscode.debug.startDebugging(workspaceFolder, debugConfig);
@@ -307,7 +320,7 @@ export function testWorkspace(goConfig: vscode.WorkspaceConfiguration, args: any
 		dir: workspaceUri.fsPath,
 		flags: getTestFlags(goConfig, args),
 		includeSubDirectories: true,
-		applyCodeCoverage:true
+		applyCodeCoverage: true
 	};
 	// Remember this config as the last executed test.
 	lastTestConfig = testConfig;
