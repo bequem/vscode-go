@@ -8,6 +8,7 @@
 
 import cp = require('child_process');
 import vscode = require('vscode');
+import { getGoConfig } from './config';
 import { toolExecutionEnvironment } from './goEnv';
 import { promptForMissingTool } from './goInstallTools';
 import { byteOffsetAt, getBinPath, getFileArchive, makeMemoizedByteOffsetConverter } from './util';
@@ -46,6 +47,16 @@ function getCommonArgs(editor: vscode.TextEditor): string[] | undefined {
 		args.push('-line');
 		args.push(`${editor.selection.start.line + 1}`);
 	}
+
+	const documentUri = editor ? editor.document.uri : null;
+	const goConfig = getGoConfig(documentUri);
+
+	const buildFlags = goConfig['buildFlags'] || [];
+
+	if (goConfig['buildTags'] && buildFlags.indexOf('-tags') === -1) {
+		args.push('-tags', goConfig['buildTags']);
+	}
+
 	return args;
 }
 
@@ -99,7 +110,7 @@ function execFillStruct(editor: vscode.TextEditor, args: string[]): Promise<void
 			}
 		});
 		if (p.pid) {
-			p.stdin.end(input);
+			p.stdin.end();
 		}
 	});
 }
