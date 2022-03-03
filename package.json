@@ -116,7 +116,8 @@
         "go.goroot",
         "go.inferGopath",
         "go.toolsGopath",
-        "go.toolsEnvVars"
+        "go.toolsEnvVars",
+        "go.toolsManagement.go"
       ]
     }
   },
@@ -1533,6 +1534,12 @@
           "description": "The logging level the extension logs at, defaults to 'error'",
           "scope": "machine-overridable"
         },
+        "go.toolsManagement.go": {
+          "type": "string",
+          "default": "",
+          "description": "The path to the `go` binary used to install the Go tools. If it's empty, the same `go` binary chosen for the project will be used for tool installation.",
+          "scope": "machine-overridable"
+        },
         "go.toolsManagement.checkForUpdates": {
           "type": "string",
           "default": "proxy",
@@ -1779,7 +1786,7 @@
             "generateTestForPackage": {
               "type": "boolean",
               "default": true,
-              "description": "If true, adds command to generate unit tests for currnt package to the editor context menu"
+              "description": "If true, adds command to generate unit tests for current package to the editor context menu"
             },
             "addImport": {
               "type": "boolean",
@@ -2335,6 +2342,11 @@
                   "markdownDescription": "check that struct field tags conform to reflect.StructTag.Get\n\nAlso report certain struct tags (json, xml) used with unexported fields.",
                   "default": true
                 },
+                "stubmethods": {
+                  "type": "boolean",
+                  "markdownDescription": "stub methods analyzer\n\nThis analyzer generates method stubs for concrete types\nin order to implement a target interface",
+                  "default": true
+                },
                 "testinggoroutine": {
                   "type": "boolean",
                   "markdownDescription": "report calls to (*testing.T).Fatal from goroutines started by a test.\n\nFunctions that abruptly terminate a test, such as the Fatal, Fatalf, FailNow, and\nSkip{,f,Now} methods of *testing.T, must be called from the test goroutine itself.\nThis checker detects calls to these functions that occur within a goroutine\nstarted by the test. For example:\n\nfunc TestFoo(t *testing.T) {\n    go func() {\n        t.Fatal(\"oops\") // error: (*T).Fatal called from non-test goroutine\n    }()\n}\n",
@@ -2383,7 +2395,7 @@
                 "useany": {
                   "type": "boolean",
                   "markdownDescription": "check for constraints that could be simplified to \"any\"",
-                  "default": true
+                  "default": false
                 }
               }
             },
