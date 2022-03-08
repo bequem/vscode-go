@@ -107,6 +107,7 @@ A list of all issues and changes can be found in the [v0.28.1 milestone](https:/
 
 ### Fixes
 - Skipped launch configuration adjustment to address build errors when debugging using externally launched delve DAP servers. (Issue [1793](https://github.com/golang/vscode-go/issues/1793))
+- Restore the fix for Issue [1729](https://github.com/golang/vscode-go/issues/1729) that was accidentally dropped during merge for release.
 
 ## v0.28.0 - 20 Sep, 2021
 
@@ -306,6 +307,7 @@ A list of all issues and changes can be found in the
 
 ## Code Health
 - Updated latest version of dlv-dap and gopls (v0.6.10)
+
 ## v0.24.0 - 6th Apr, 2021
 
 🧪 We re-enabled the option to use `dlv dap` (Delve's native DAP implementation) instead of the old debug
@@ -374,12 +376,6 @@ and the [changes since v0.22.1](https://github.com/golang/vscode-go/compare/v0.2
 * Updated LSP to 3.16.0 (stable), and DAP to 1.44.0.
 
 ## v0.23.0 - 4th Mar, 2021
-
-Delve DAP is a new debug adapter embedded in `dlv`, the Go debugger.
-It is written in Go, understands Go's data types and runtime better,
-and is under active development. In this release, we added back
-access to Delve DAP. Delve DAP is still in the experimental stage
-and we appreciate any feedback and bug reports!
 
 A list of all issues and changes can be found in the
 [v0.23.0 milestone](https://github.com/golang/vscode-go/milestone/21?closed=1)
