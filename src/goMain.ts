@@ -122,6 +122,8 @@ export let restartLanguageServer = (reason: RestartReason) => {
 	return;
 };
 
+const RESTART_SESSION_ID = 'workbench.action.debug.restart';
+
 export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionAPI> {
 	if (process.env['VSCODE_GO_IN_TEST'] === '1') {
 		// Make sure this does not run when running in test.
@@ -786,26 +788,11 @@ function addOnSaveTextDocumentListeners(ctx: vscode.ExtensionContext) {
 			if (document.languageId !== 'go') {
 				return;
 			}
-			const session = vscode.debug.activeDebugSession;
-			if (session && session.type === 'go') {
-				const neverAgain = { title: "Don't Show Again" };
-				const ignoreActiveDebugWarningKey = 'ignoreActiveDebugWarningKey';
-				const ignoreActiveDebugWarning = getFromGlobalState(ignoreActiveDebugWarningKey);
-				if (!ignoreActiveDebugWarning) {
-					vscode.window
-						.showWarningMessage(
-							'A debug session is currently active. Changes to your Go files may result in unexpected behaviour.',
-							neverAgain
-						)
-						.then((result) => {
-							if (result === neverAgain) {
-								updateGlobalState(ignoreActiveDebugWarningKey, true);
-							}
-						});
-				}
-			}
 			if (vscode.window.visibleTextEditors.some((e) => e.document.fileName === document.fileName)) {
 				runBuilds(document, getGoConfig(document.uri));
+
+				vscode.window.showWarningMessage('Goを再実行しました。');
+				vscode.commands.executeCommand(RESTART_SESSION_ID);
 			}
 		},
 		null,
@@ -918,7 +905,8 @@ async function suggestUpdates(ctx: vscode.ExtensionContext) {
 	} else {
 		const updateToolsCmdText = 'Update tools';
 		const selected = await vscode.window.showWarningMessage(
-			`Tools (${toolsToUpdate.map((tool) => tool.name).join(', ')}) need recompiling to work with ${configuredGoVersion.version
+			`Tools (${toolsToUpdate.map((tool) => tool.name).join(', ')}) need recompiling to work with ${
+				configuredGoVersion.version
 			}`,
 			updateToolsCmdText
 		);
