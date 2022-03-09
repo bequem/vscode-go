@@ -72,45 +72,50 @@ function execFillStruct(editor: vscode.TextEditor, args: string[]): Promise<void
 	const tabsCount = getTabsCount(editor);
 
 	return new Promise<void>((resolve, reject) => {
-		const p = cp.execFile(fillstruct, args, { env: toolExecutionEnvironment() }, (err, stdout, stderr) => {
-			try {
-				if (err && (<any>err).code === 'ENOENT') {
-					promptForMissingTool('fillstruct');
-					return reject();
+		try {
+			const p = cp.execFile(fillstruct, args, { env: toolExecutionEnvironment() }, (err, stdout, stderr) => {
+				try {
+					if (err && (<any>err).code === 'ENOENT') {
+						promptForMissingTool('fillstruct');
+						return reject();
+					}
+					if (err) {
+						vscode.window.showInformationMessage(`Cannot fill struct: ${stderr}`);
+						return reject();
+					}
+
+					const output = <GoFillStructOutput[]>JSON.parse(stdout);
+
+					if (output.length === 0) {
+						vscode.window.showInformationMessage('Got empty fillstruct output');
+						return reject();
+					}
+
+					const indent = '\t'.repeat(tabsCount);
+					const offsetConverter = makeMemoizedByteOffsetConverter(Buffer.from(editor.document.getText()));
+
+					editor
+						.edit((editBuilder) => {
+							output.forEach((structToFill) => {
+								const out = structToFill.code.replace(/\n/g, '\n' + indent);
+								const rangeToReplace = new vscode.Range(
+									editor.document.positionAt(offsetConverter(structToFill.start)),
+									editor.document.positionAt(offsetConverter(structToFill.end))
+								);
+								editBuilder.replace(rangeToReplace, out);
+							});
+						})
+						.then(() => resolve());
+				} catch (e) {
+					reject(e);
 				}
-				if (err) {
-					vscode.window.showInformationMessage(`Cannot fill struct: ${stderr}`);
-					return reject();
-				}
-
-				const output = <GoFillStructOutput[]>JSON.parse(stdout);
-
-				if (output.length === 0) {
-					vscode.window.showInformationMessage('Got empty fillstruct output');
-					return reject();
-				}
-
-				const indent = '\t'.repeat(tabsCount);
-				const offsetConverter = makeMemoizedByteOffsetConverter(Buffer.from(editor.document.getText()));
-
-				editor
-					.edit((editBuilder) => {
-						output.forEach((structToFill) => {
-							const out = structToFill.code.replace(/\n/g, '\n' + indent);
-							const rangeToReplace = new vscode.Range(
-								editor.document.positionAt(offsetConverter(structToFill.start)),
-								editor.document.positionAt(offsetConverter(structToFill.end))
-							);
-							editBuilder.replace(rangeToReplace, out);
-						});
-					})
-					.then(() => resolve());
-			} catch (e) {
-				reject(e);
+			});
+			if (p.pid) {
+				p.stdin.end(input);
 			}
-		});
-		if (p.pid) {
-			p.stdin.end(input);
+		} catch (e) {
+			promptForMissingTool('fillstruct');
+			return reject();
 		}
 	});
 }
