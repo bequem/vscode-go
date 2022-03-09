@@ -825,6 +825,8 @@ function addOnSaveTextDocumentListeners(ctx: vscode.ExtensionContext) {
 					if (sessions.length > 0) {
 						vscode.window.showInformationMessage('Goを再実行しました。');
 					}
+				} else {
+					vscode.window.showErrorMessage('ビルドエラーのため再実行はできません');
 				}
 			}
 		},
