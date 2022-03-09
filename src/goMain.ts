@@ -47,6 +47,7 @@ import {
 	updateGoVarsFromConfig
 } from './goInstallTools';
 import {
+	hasDiagnostics,
 	languageServerIsRunning,
 	RestartReason,
 	showServerOutputChannel,
@@ -130,7 +131,9 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionA
 		return;
 	}
 
-	vscode.debug.onDidStartDebugSession((session) => sessions.push(session));
+	vscode.debug.onDidStartDebugSession((session) => {
+		sessions = sessions.filter((s) => s.id !== session.id).concat(session);
+	});
 	vscode.debug.onDidTerminateDebugSession((session) => (sessions = sessions.filter((s) => s.id !== session.id)));
 
 	setGlobalState(ctx.globalState);
@@ -794,11 +797,13 @@ function addOnSaveTextDocumentListeners(ctx: vscode.ExtensionContext) {
 			if (vscode.window.visibleTextEditors.some((e) => e.document.fileName === document.fileName)) {
 				runBuilds(document, getGoConfig(document.uri));
 
-				vscode.window.showWarningMessage('Goを再実行しました。');
-
-				const goSession = sessions.find((s) => s.type == 'go');
-				if (goSession != null) {
-					vscode.commands.executeCommand(RESTART_SESSION_ID, '', { sessionId: goSession.id });
+				if (hasDiagnostics.size == 0) {
+					sessions.forEach((goSession) => {
+						vscode.commands.executeCommand(RESTART_SESSION_ID, '', { sessionId: goSession.id });
+					});
+					if (sessions.length > 0) {
+						vscode.window.showInformationMessage('Goを再実行しました。');
+					}
 				}
 			}
 		},
