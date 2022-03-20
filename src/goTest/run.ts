@@ -92,7 +92,6 @@ export class GoTestRunner {
 			TestRunProfileKind.Run,
 			async (request, token) => {
 				try {
-					await execShell('make', ['test-infra-up'], workspace.workspaceFolders[0], testOutputChannel);
 					await this.run(request, token);
 				} catch (error) {
 					const m = 'Failed to execute tests';
@@ -108,8 +107,6 @@ export class GoTestRunner {
 			TestRunProfileKind.Debug,
 			async (request, token) => {
 				try {
-					await execShell('make', ['test-infra-up'], workspace.workspaceFolders[0], testOutputChannel);
-
 					await this.debug(request, token);
 				} catch (error) {
 					const m = 'Failed to debug tests';

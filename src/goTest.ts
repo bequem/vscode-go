@@ -60,12 +60,6 @@ async function _testAtCursor(goConfig: vscode.WorkspaceConfiguration, cmd: TestA
 
 	await editor.document.save();
 
-	await execShell(
-		'make',
-		['test-infra-up'],
-		vscode.workspace.getWorkspaceFolder(editor.document.uri),
-		testOutputChannel
-	);
 	let result;
 	if (cmd === 'debug') {
 		result = debugTestAtCursor(editor, testFunctionName, testFunctions, goConfig);
