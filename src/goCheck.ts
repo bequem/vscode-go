@@ -11,8 +11,7 @@ import path = require('path');
 import vscode = require('vscode');
 import { getGoplsConfig } from './config';
 import { goBuild } from './goBuild';
-import { clearCoverage } from './goCover';
-import { buildLanguageServerConfig } from './goLanguageServer';
+import { buildLanguageServerConfig } from './language/goLanguageServer';
 import { goLint } from './goLint';
 import { buildDiagnosticCollection, lintDiagnosticCollection, vetDiagnosticCollection } from './goMain';
 import { isModSupported } from './goModules';
@@ -20,6 +19,7 @@ import { diagnosticsStatusBarItem, outputChannel } from './goStatus';
 import { goVet } from './goVet';
 import { getTestFlags, goTest, TestConfig } from './testUtils';
 import { ICheckResult } from './util';
+import { clearCoverage } from './goCover';
 
 const STATUS_BAR_ITEM_NAME = 'Go Test';
 const statusBarItem = vscode.window.createStatusBarItem(STATUS_BAR_ITEM_NAME, vscode.StatusBarAlignment.Left);

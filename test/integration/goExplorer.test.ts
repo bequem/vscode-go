@@ -33,7 +33,7 @@ suite('GoExplorerProvider', () => {
 	test('env tree', async () => {
 		const [env] = await explorer.getChildren();
 		assert.strictEqual(env.label, 'env');
-		assert.strictEqual(env.contextValue, 'go:explorer:env');
+		assert.strictEqual(env.contextValue, 'go:explorer:envtree');
 	});
 
 	test('env tree items', async () => {
@@ -56,9 +56,11 @@ suite('GoExplorerProvider', () => {
 		const expectTools = allTools.map((t) => t.name);
 		const [, tools] = await explorer.getChildren();
 		const items = (await explorer.getChildren(tools)) as TreeItem[];
-		assert.deepStrictEqual(
-			items.map((t) => t.label),
-			expectTools
-		);
+		for (const idx in items) {
+			assert(
+				items[idx].label.toString().startsWith(expectTools[idx]),
+				`Unexpected tool tree item with label "${items[idx].label}"`
+			);
+		}
 	});
 });
