@@ -277,7 +277,6 @@ export function applyCodeCoverageToAllEditors(coverProfilePath: string, dir: str
 
 			getImportPathToFolder([...seenPaths], dir).then((pathsToDirs) => {
 				createCoverageData(pathsToDirs, coveragePath);
-				setDecorators();
 				vscode.window.visibleTextEditors.forEach(applyCodeCoverage);
 				resolve();
 			});
