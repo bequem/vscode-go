@@ -126,6 +126,7 @@ export let restartLanguageServer = (reason: RestartReason) => {
 };
 
 const RESTART_SESSION_ID = 'workbench.action.debug.restart';
+const STOP_SESSION_ID = 'workbench.action.debug.stop';
 let sessions: vscode.DebugSession[] = [];
 export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionAPI> {
 	if (process.env['VSCODE_GO_IN_TEST'] === '1') {
@@ -811,18 +812,12 @@ function addOnSaveTextDocumentListeners(ctx: vscode.ExtensionContext) {
 				runBuilds(document, getGoConfig(document.uri));
 
 				if (hasDiagnostics.size === 0) {
-					sessions.forEach((goSession) => {
-						vscode.commands.executeCommand(RESTART_SESSION_ID, '', { sessionId: goSession.id });
+					sessions.forEach((session) => {
+						vscode.commands.executeCommand(STOP_SESSION_ID, '', { sessionId: session.id });
 					});
+
 					if (sessions.length > 0) {
-						vscode.window.showInformationMessage('Goを再実行しました。');
-					}
-				}
-				if (hasDiagnostics.size === 0) {
-					sessions.forEach((goSession) => {
-						vscode.commands.executeCommand(RESTART_SESSION_ID, '', { sessionId: goSession.id });
-					});
-					if (sessions.length > 0) {
+						vscode.commands.executeCommand(RESTART_SESSION_ID, '', { sessionId: sessions[0].id });
 						vscode.window.showInformationMessage('Goを再実行しました。');
 					}
 				} else {
