@@ -199,7 +199,7 @@ export class GoTestResolver {
 	// Any previously existing tests that no longer have a corresponding symbol in
 	// the file will be disposed. If the document contains no tests, it will be
 	// disposed.
-	async processDocument(doc: TextDocument, ranges?: Range[]) {
+	async processDocument(doc: TextDocument) {
 		const seen = new Set<string>();
 		const item = await this.getFile(doc.uri);
 		const symbols = await this.provideDocumentSymbols(doc, null);
@@ -213,10 +213,6 @@ export class GoTestResolver {
 			if (!seen.has(name)) {
 				dispose(this, child);
 				return;
-			}
-
-			if (ranges?.some((r) => !!child.range.intersection(r))) {
-				item.children.forEach((x) => dispose(this, x));
 			}
 		});
 

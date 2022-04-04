@@ -220,10 +220,7 @@ export class GoTestExplorer {
 	}
 
 	protected async didChangeTextDocument(e: TextDocumentChangeEvent) {
-		await this.documentUpdate(
-			e.document,
-			e.contentChanges.map((x) => x.range)
-		);
+		await this.documentUpdate(e.document);
 	}
 
 	protected async didChangeWorkspaceFolders(e: WorkspaceFoldersChangeEvent) {
@@ -294,7 +291,7 @@ export class GoTestExplorer {
 	/* ***** Private ***** */
 
 	// Handle opened documents, document changes, and file creation.
-	private async documentUpdate(doc: TextDocument, ranges?: Range[]) {
+	private async documentUpdate(doc: TextDocument) {
 		if (!doc.uri.path.endsWith('_test.go')) {
 			return;
 		}
@@ -307,7 +304,7 @@ export class GoTestExplorer {
 			return;
 		}
 
-		await this.resolver.processDocument(doc, ranges);
+		await this.resolver.processDocument(doc);
 		this.resolver.updateGoTestContext();
 	}
 }
