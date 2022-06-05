@@ -309,6 +309,11 @@
         "description": "Displays test coverage in the current package."
       },
       {
+        "command": "go.test.clearCoverage",
+        "title": "Go: Clear Test Coverage",
+        "description": ""
+      },
+      {
         "command": "go.test.generate.package",
         "title": "Go: Generate Unit Tests For Package",
         "description": "Generates unit tests for the current package"
@@ -1778,6 +1783,11 @@
         "go.editorContextMenuCommands": {
           "type": "object",
           "properties": {
+            "clearCoverage": {
+              "type": "boolean",
+              "default": true,
+              "description": ""
+            },
             "toggleTestFile": {
               "type": "boolean",
               "default": true,
@@ -2683,6 +2693,11 @@
         {
           "when": "editorTextFocus && config.go.editorContextMenuCommands.testCoverage && resourceLangId == go",
           "command": "go.test.coverage",
+          "group": "Go group 1"
+        },
+        {
+          "when": "editorTextFocus && resourceLangId == go",
+          "command": "go.test.clearCoverage",
           "group": "Go group 1"
         },
         {

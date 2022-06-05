@@ -170,6 +170,7 @@ Experimental Feature: Enable/Disable entries from the context menu in the editor
 | `addImport` | If true, adds command to import a package to the editor context menu <br/> Default: `true` |
 | `addTags` | If true, adds command to add configured tags from struct fields to the editor context menu <br/> Default: `true` |
 | `benchmarkAtCursor` | If true, adds command to benchmark the test under the cursor to the editor context menu <br/> Default: `false` |
+| `clearCoverage` | <br/> <br/> Default: `true` |
 | `debugTestAtCursor` | If true, adds command to debug the test under the cursor to the editor context menu <br/> Default: `false` |
 | `fillStruct` | If true, adds command to fill struct literal with default values to the editor context menu <br/> Default: `true` |
 | `generateTestForFile` | If true, adds command to generate unit tests for current file to the editor context menu <br/> Default: `true` |

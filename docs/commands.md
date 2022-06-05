@@ -99,6 +99,10 @@ Re-runs the last debugged test run through a codelens or "Go: Debug Test at Curs
 
 Displays test coverage in the current package.
 
+### `Go: Clear Test Coverage`
+
+
+
 ### `Go: Generate Unit Tests For Package`
 
 Generates unit tests for the current package
