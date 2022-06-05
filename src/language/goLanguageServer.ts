@@ -107,6 +107,8 @@ const languageServerStartMutex = new Mutex();
 let serverTraceChannel: vscode.OutputChannel;
 let crashCount = 0;
 
+export const hasDiagnostics = new Set<string>();
+
 // Some metrics for automated issue reports:
 let restartHistory: Restart[] = [];
 
@@ -636,6 +638,11 @@ export async function buildLanguageClient(cfg: BuildLanguageClientOption): Promi
 					removeDuplicateDiagnostics(buildDiagnosticCollection, uri, diagnostics);
 					removeDuplicateDiagnostics(lintDiagnosticCollection, uri, diagnostics);
 
+					if (diagnostics.length > 0) {
+						hasDiagnostics.add(uri.path);
+					} else {
+						hasDiagnostics.delete(uri.path);
+					}
 					return next(uri, diagnostics);
 				},
 				provideCompletionItem: async (
