@@ -17,15 +17,18 @@ import {
 	Uri,
 	WorkspaceConfiguration
 } from 'vscode';
-import vscode = require('vscode');
-import { outputChannel } from '../goStatus';
-import { isModSupported } from '../goModules';
 import { getGoConfig } from '../config';
+import { coverageMergePath } from '../goCover';
+import { isModSupported } from '../goModules';
+import { outputChannel } from '../goStatus';
+import { debugTestAtCursor } from '../goTest';
 import { getBenchmarkFunctions, getTestFlags, getTestFunctions, goTest, GoTestOutput } from '../testUtils';
+import { GoTestProfiler, ProfilingOptions } from './profile';
 import { GoTestResolver } from './resolve';
 import { dispose, forEachAsync, GoTest, Workspace } from './utils';
-import { GoTestProfiler, ProfilingOptions } from './profile';
-import { debugTestAtCursor } from '../goTest';
+import vscode = require('vscode');
+
+import fs = require('fs');
 
 let debugSessionID = 0;
 
@@ -263,6 +266,10 @@ export class GoTestRunner {
 
 		let success = true;
 		const subItems: string[] = [];
+		if (fs.existsSync(coverageMergePath)) {
+			fs.unlinkSync(coverageMergePath);
+		}
+
 		for (const [pkg, items] of collected.entries()) {
 			const isMod = isInMod(pkg) || (await isModSupported(pkg.uri, true));
 			const goConfig = getGoConfig(pkg.uri);

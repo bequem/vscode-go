@@ -219,6 +219,14 @@ export const allToolsInformation: { [key: string]: Tool } = {
 		isImportant: false,
 		description: 'Fill structs with defaults'
 	},
+	'gocovmerge': {
+		name: 'gocovmerge',
+		importPath: 'github.com/dylandreimerink/gocovmerge/cmd/gocovmerge',
+		modulePath: 'github.com/dylandreimerink/gocovmerge',
+		replacedByGopls: true,
+		isImportant: false,
+		description: ''
+	},
 	'godoctor': {
 		name: 'godoctor',
 		importPath: 'github.com/godoctor/godoctor',

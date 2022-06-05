@@ -21,6 +21,8 @@ import { getBinPath, getCurrentGoPath, getTempFilePath, LineBuffer, resolvePath 
 import { parseEnvFile } from './utils/envUtils';
 import { envPath, expandFilePathInOutput, getCurrentGoRoot, getCurrentGoWorkspaceFromGOPATH } from './utils/pathUtils';
 import { killProcessTree } from './utils/processUtils';
+import { fstat } from 'fs';
+import { remove } from 'fs-extra';
 
 const testOutputChannel = vscode.window.createOutputChannel('Go Tests');
 const STATUS_BAR_ITEM_NAME = 'Go Test Cancel';

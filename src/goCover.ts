@@ -9,13 +9,19 @@
 'use strict';
 
 import fs = require('fs');
+import { type } from 'os';
+import { dirname, isAbsolute } from 'path';
 import path = require('path');
 import vscode = require('vscode');
 import { getGoConfig } from './config';
+import { toolExecutionEnvironment } from './goEnv';
+import { promptForMissingTool } from './goInstallTools';
 import { isModSupported } from './goModules';
 import { getImportPathToFolder } from './goPackages';
 import { getTestFlags, goTest, showTestOutput, TestConfig } from './testUtils';
+import { getBinPath, getTempFilePath } from './util';
 import { fixDriveCasingInWindows } from './utils/pathUtils';
+import cp = require('child_process');
 
 let gutterSvgs: { [key: string]: string };
 
@@ -207,6 +213,40 @@ export function clearCoverage() {
 	isCoverageApplied = false;
 }
 
+async function runMergeCover(newPath: string, ...args: string[]): Promise<void> {
+	const gocovmerge = getBinPath('gocovmerge');
+
+	return new Promise((resolve, reject) => {
+		if (!isAbsolute(gocovmerge)) {
+			promptForMissingTool('gocovmerge');
+			return resolve();
+		}
+		const f = fs.createWriteStream(newPath);
+
+		const child = cp.spawn(gocovmerge, args, { env: toolExecutionEnvironment() });
+		child.stdout.on('data', (data) => {
+			f.write(data);
+		});
+
+		child.stderr.on('data', (data) => {
+			vscode.window.showErrorMessage(data);
+			reject();
+		});
+
+		child.on('close', (code) => {
+			console.log('child process exited with code ' + code);
+			f.close();
+			if (code == 0) {
+				resolve();
+			} else {
+				reject();
+			}
+		});
+	});
+}
+
+export const coverageMergePath = getTempFilePath('coverageMerge');
+
 /**
  * Extract the coverage data from the given cover profile & apply them on the files in the open editors.
  * @param coverProfilePath Path to the file that has the cover profile data
@@ -214,15 +254,20 @@ export function clearCoverage() {
  * @param dir Directory to execute go list in
  */
 export function applyCodeCoverageToAllEditors(coverProfilePath: string, dir: string): Promise<void> {
-	const v = new Promise<void>((resolve, reject) => {
+	const v = new Promise<void>(async (resolve, reject) => {
 		try {
 			const showCounts = getGoConfig().get('coverShowCounts') as boolean;
 			const coveragePath = new Map<string, CoverageData>(); // <filename> from the cover profile to the coverage data.
-
-			// collect the packages named in the coverage file
 			const seenPaths = new Set<string>();
 			// for now read synchronously and hope for no errors
-			const contents = fs.readFileSync(coverProfilePath).toString();
+			const args: string[] = [coverProfilePath];
+			if (fs.existsSync(coverageMergePath)) {
+				args.push(coverageMergePath);
+			}
+
+			await runMergeCover(coverageMergePath + '_tmp', ...args);
+			fs.copyFileSync(coverageMergePath + '_tmp', coverageMergePath);
+			const contents = fs.readFileSync(coverageMergePath).toString();
 			contents.split('\n').forEach((line) => {
 				// go test coverageprofile generates output:
 				//    filename:StartLine.StartColumn,EndLine.EndColumn Hits CoverCount
@@ -276,7 +321,11 @@ export function applyCodeCoverageToAllEditors(coverProfilePath: string, dir: str
 			});
 
 			getImportPathToFolder([...seenPaths], dir).then((pathsToDirs) => {
+				// Clear existing coverage files
+				clearCoverage();
+
 				createCoverageData(pathsToDirs, coveragePath);
+				setDecorators();
 				vscode.window.visibleTextEditors.forEach(applyCodeCoverage);
 				resolve();
 			});
@@ -369,6 +418,7 @@ export function applyCodeCoverage(editor: vscode.TextEditor) {
 		if (doc !== fixDriveCasingInWindows(filename)) {
 			continue;
 		}
+
 		isCoverageApplied = true;
 		const cd = coverageData[filename];
 		if (coverageOptions === 'showCoveredCodeOnly' || coverageOptions === 'showBothCoveredAndUncoveredCode') {
